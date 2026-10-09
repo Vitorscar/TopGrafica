@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Painel — TOP PRINT</title>
+<style>
+:root{--bg:#f4f5f7;--card:#fff;--tx:#14171f;--mut:#667085;--bd:#e3e6eb;--m:#C8007A;--y:#FFE600;--c:#00A0DC}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1117;--card:#171a22;--tx:#eef0f4;--mut:#9aa3b2;--bd:#262b36}}
+*{box-sizing:border-box;margin:0}body{font:15px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--tx)}
+:focus-visible{outline:3px solid var(--c);outline-offset:2px}
+header{display:flex;align-items:center;gap:12px;padding:10px 5%;background:var(--card);border-bottom:1px solid var(--bd)}
+header img{width:40px;height:40px;border-radius:50%}header b{margin-right:auto}
+main{max-width:980px;margin:0 auto;padding:24px 5%}
+.btn{border:0;border-radius:10px;padding:9px 16px;font:inherit;cursor:pointer;background:var(--m);color:#fff;text-decoration:none;display:inline-block}
+.btn.o{background:none;color:var(--tx);border:1px solid var(--bd)}.btn.wa{background:#1FA855}
+.btn:disabled{opacity:.6;cursor:progress}
+input,select{font:inherit;color:var(--tx);background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:9px;width:100%}
+.login{max-width:340px;margin:12vh auto;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:24px;display:grid;gap:12px}
+.barra{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:16px}
+.tabs,.filtros{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.barra .tabs{margin-bottom:0}
+.chip{border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:99px;padding:6px 14px;cursor:pointer;font:inherit}
+.chip[aria-pressed=true]{background:var(--tx);color:var(--bg)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px}
+.stat{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;border-top:4px solid var(--c)}
+.stat:nth-child(2){border-color:var(--m)}.stat:nth-child(3){border-color:var(--y)}.stat:nth-child(4){border-color:#1FA855}
+.stat strong{font-size:24px;display:block}
+.row{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:10px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+.row small{color:var(--mut);display:block;white-space:pre-line}
+.tag{display:inline-block;border-radius:99px;padding:1px 10px;font-size:13px;background:var(--c);color:#fff}
+.tag.instagram{background:var(--m)}.tag.whatsapp{background:#1FA855}.tag.indicacao{background:#111;color:var(--y)}
+.acoes{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.acoes select{width:auto}
+.acoes .preco{width:120px}
+/* produtos */
+.form-prod{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;display:grid;grid-template-columns:1.4fr 1.2fr 130px 1fr auto;gap:10px;align-items:center;margin-bottom:16px}
+.form-prod .file{border:1px dashed var(--bd);border-radius:8px;padding:9px;text-align:center;cursor:pointer;color:var(--mut);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.form-prod .file:hover{border-color:var(--c);color:var(--tx)}
+.form-prod .file input{display:none}
+.prod-info{display:flex;gap:12px;align-items:center;min-width:0}
+.thumb{width:56px;height:56px;border-radius:10px;object-fit:cover;background:var(--bg);border:1px solid var(--bd);flex:0 0 auto;display:grid;place-items:center;font-size:22px}
+.campos{display:grid;gap:6px;min-width:0;width:100%}
+#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:var(--tx);color:var(--bg);padding:10px 18px;border-radius:99px;opacity:0;pointer-events:none;transition:.25s;z-index:99;font-size:14px}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+#toast.err{background:var(--m);color:#fff}
+[hidden]{display:none!important}.vazio{color:var(--mut);padding:24px;text-align:center}
+.vazio code{background:var(--card);border:1px solid var(--bd);border-radius:6px;padding:1px 6px}
+@media(max-width:820px){.form-prod{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){.row{grid-template-columns:1fr}.form-prod{grid-template-columns:1fr}}
+</style></head><body>
+<form class="login" id="login"><h2>Painel TOP PRINT</h2>
+ <input id="e" type="email" placeholder="E-mail" required autocomplete="username">
+ <input id="s" type="password" placeholder="Senha" required autocomplete="current-password">
+ <button class="btn">Entrar</button><small id="erro" role="alert" style="color:var(--m)"></small></form>
+
+<div id="painel" hidden>
+<header><img src="assets/logo.jpg" alt=""><b>TOP PRINT · Painel</b><button class="btn o" id="sair">Sair</button></header>
+<main>
+ <div class="stats" id="stats"></div>
+
+ <div class="barra">
+   <div class="tabs">
+     <button class="chip" data-t="clientes" aria-pressed="true">Clientes</button>
+     <button class="chip" data-t="orcamentos" aria-pressed="false">Orçamentos</button>
+     <button class="chip" data-t="produtos" aria-pressed="false">Produtos</button>
+   </div>
+   <button class="btn o" id="exportar">⬇️ Exportar Excel</button>
+ </div>
+
+ <form class="form-prod" id="formProd" hidden autocomplete="off">
+   <input name="name" placeholder="Nome do produto" required maxlength="80">
+   <input name="type" list="tipos" placeholder="Tipo (ex: personalização)" required maxlength="40">
+   <input name="price" type="number" step="0.01" min="0" placeholder="Preço (R$)" required>
+   <label class="file"><span id="fileTxt">📷 Imagem</span><input name="image" type="file" accept="image/*"></label>
+   <button class="btn" type="submit">Adicionar</button>
+ </form>
+
+ <div class="filtros" id="filtros"></div><div id="lista"></div>
+</main></div>
+
+<datalist id="tipos"></datalist>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script>
+/* =========================================================================
+   TABELAS NECESSÁRIAS NO SUPABASE (SQL Editor):
+
+   create table if not exists products (
+     id uuid primary key default gen_random_uuid(),
+     name text not null,
+     type text,
+     price numeric(10,2) default 0,
+     image_url text,
+     created_at timestamptz default now()
+   );
+   alter table products enable row level security;
+   create policy "produtos autenticados" on products
+     for all to authenticated using (true) with check (true);
+
+   STORAGE: crie um bucket público chamado "produtos".
+   ========================================================================= */
+
+const SUPABASE_URL="",SUPABASE_ANON_KEY="";   // mesmos dados do index.html
+const ORIGENS=["site","instagram","whatsapp","indicacao"];
+const STATUS=["novo","negociando","pago","entregue","cancelado"];
+const TIPOS=["personalização","impressão","adesivo","camiseta","caneca","brinde","outro"];
+const BUCKET="produtos";
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const brl=v=>Number(v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+const fmtFone=f=>{const d=String(f||"").replace(/^55/,"");return d.length==11?`(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`:d.length==10?`(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`:f};
+const label=s=>"Cliente "+String(s||"").charAt(0).toUpperCase()+String(s||"").slice(1);
+const dataBR=v=>v?new Date(v).toLocaleString("pt-BR"):"";
+const uid=()=>crypto.randomUUID?crypto.randomUUID():Date.now()+"-"+Math.random().toString(36).slice(2);
+
+const db=window.supabase.createClient(SUPABASE_URL||"https://x.supabase.co",SUPABASE_ANON_KEY||"x");
+let aba="clientes",filtro="todos",clientes=[],orcs=[],produtos=[],erroProdutos=null;
+
+/* ---------- toast ---------- */
+let toastTimer;
+function toast(msg,err){const el=$("toast");el.textContent=msg;el.classList.toggle("err",!!err);
+ el.classList.add("on");clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove("on"),2800)}
+
+/* ---------- login ---------- */
+$("login").onsubmit=async e=>{e.preventDefault();
+ if(!SUPABASE_URL){$("erro").textContent="Preencha SUPABASE_URL e SUPABASE_ANON_KEY no arquivo.";return}
+ const{error}=await db.auth.signInWithPassword({email:$("e").value,password:$("s").value});
+ $("erro").textContent=error?"E-mail ou senha incorretos.":"";if(!error)entrar()};
+$("sair").onclick=async()=>{await db.auth.signOut();location.reload()};
+async function entrar(){$("login").hidden=true;$("painel").hidden=false;await carregar()}
+
+/* ---------- carga de dados ---------- */
+async function carregar(){
+ const[c,o,p]=await Promise.all([
+   db.from("customers").select("*").order("created_at",{ascending:false}),
+   db.from("quotes").select("*,customers(name,phone,source)").order("created_at",{ascending:false}),
+   db.from("products").select("*").order("created_at",{ascending:false})
+ ]);
+ clientes=c.data||[];orcs=o.data||[];produtos=p.data||[];
+ erroProdutos=p.error?p.error.message:null;
+
+ $("stats").innerHTML=[
+   ["Clientes",clientes.length],
+   ["Pelo site",clientes.filter(x=>x.source==="site").length],
+   ["Orçamentos novos",orcs.filter(x=>x.status==="novo").length],
+   ["Vendas pagas",orcs.filter(x=>x.status==="pago"||x.status==="entregue").length],
+   ["Produtos",produtos.length]
+ ].map(([n,v])=>`<div class="stat"><strong>${v}</strong>${n}</div>`).join("");
+
+ $("tipos").innerHTML=[...new Set([...TIPOS,...produtos.map(p=>p.type).filter(Boolean)])]
+   .map(t=>`<option value="${esc(t)}">`).join("");
+
+ desenhar();
+}
+
+/* ---------- render ---------- */
+function desenhar(){
+ $("formProd").hidden = aba!=="produtos";
+
+ if(aba==="produtos"){
+   const tipos=[...new Set(produtos.map(p=>p.type).filter(Boolean))];
+   $("filtros").hidden = !tipos.length;
+   $("filtros").innerHTML=["todos",...tipos].map(t=>
+     `<button class="chip" data-f="${esc(t)}" aria-pressed="${t===filtro}">${t==="todos"?"Todos os tipos":esc(t)}</button>`).join("");
+   const itens=produtos.filter(p=>filtro==="todos"||p.type===filtro);
+   $("lista").innerHTML = itens.length ? itens.map(prodRow).join("")
+     : erroProdutos
+       ? `<p class="vazio">Não foi possível carregar os produtos.<br><small>${esc(erroProdutos)}</small><br><br>
+          Crie a tabela <code>products</code> e o bucket <code>${BUCKET}</code> no Supabase.</p>`
+       : '<p class="vazio">Nenhum produto cadastrado ainda. Use o formulário acima 👆</p>';
+   return;
+ }
+
+ $("filtros").hidden=false;
+ const lista=aba==="clientes"?clientes:orcs;
+ const fontes=[...new Set([...ORIGENS,...clientes.map(c=>c.source)])];
+ $("filtros").innerHTML=["todos",...fontes].map(f=>
+   `<button class="chip" data-f="${esc(f)}" aria-pressed="${f===filtro}">${f==="todos"?"Todos":esc(label(f))}</button>`).join("");
+ const src=x=>aba==="clientes"?x.source:x.customers?.source;
+ const itens=lista.filter(x=>filtro==="todos"||src(x)===filtro);
+ $("lista").innerHTML=itens.length?itens.map(x=>aba==="clientes"?cliRow(x):orcRow(x)).join(""):'<p class="vazio">Nada por aqui ainda.</p>';
+}
+
+const zap=f=>`https://wa.me/${f}`;
+const cliRow=c=>`<div class="row"><div><strong>${esc(c.name)}</strong><br>📱 ${esc(fmtFone(c.phone))}<br><span class="tag ${esc(c.source)}">🏷️ ${esc(label(c.source))}</span>
+ <small>${dataBR(c.created_at)}</small></div>
+ <div class="acoes"><select data-cs="${c.id}" aria-label="Origem">${ORIGENS.map(o=>`<option ${o===c.source?"selected":""}>${o}</option>`).join("")}</select><a class="btn wa" target="_blank" rel="noopener" href="${zap(c.phone)}">WhatsApp</a></div></div>`;
+
+const orcRow=q=>`<div class="row"><div><strong>${esc(q.customers?.name||"—")}</strong> · ${brl(q.total)} <span class="tag ${esc(q.customers?.source)}">${esc(q.customers?.source||"")}</span>
+ <small>${esc(q.summary)}\n${dataBR(q.created_at)}</small></div>
+ <div class="acoes"><select data-qs="${q.id}" aria-label="Status">${STATUS.map(s=>`<option ${s===q.status?"selected":""}>${s}</option>`).join("")}</select>${q.customers?`<a class="btn wa" target="_blank" rel="noopener" href="${zap(q.customers.phone)}">WhatsApp</a>`:""}</div></div>`;
+
+const prodRow=p=>`<div class="row">
+ <div class="prod-info">
+   ${p.image_url?`<img class="thumb" src="${esc(p.image_url)}" alt="" loading="lazy">`:'<div class="thumb">📦</div>'}
+   <div class="campos">
+     <input data-pn="${p.id}" value="${esc(p.name)}" maxlength="80" aria-label="Nome do produto">
+     <input data-pt="${p.id}" list="tipos" value="${esc(p.type||"")}" maxlength="40" placeholder="Tipo" aria-label="Tipo do produto">
+   </div>
+ </div>
+ <div class="acoes">
+   <input class="preco" type="number" step="0.01" min="0" data-pp="${p.id}" value="${Number(p.price||0).toFixed(2)}" aria-label="Preço">
+   <button class="btn o" data-del="${p.id}">Excluir</button>
+ </div></div>`;
+
+/* ---------- interações ---------- */
+document.addEventListener("click",async e=>{
+ const t=e.target.closest("[data-t]"),f=e.target.closest("[data-f]"),d=e.target.closest("[data-del]");
+ if(t){aba=t.dataset.t;filtro="todos";document.querySelectorAll("[data-t]").forEach(b=>b.setAttribute("aria-pressed",b===t));desenhar()}
+ if(f){filtro=f.dataset.f;desenhar()}
+ if(d)excluirProduto(d.dataset.del);
+});
+
+document.addEventListener("change",async e=>{
+ const t=e.target;
+ if(t.dataset.cs){await db.from("customers").update({source:t.value}).eq("id",t.dataset.cs);return carregar()}
+ if(t.dataset.qs){await db.from("quotes").update({status:t.value}).eq("id",t.dataset.qs);return carregar()}
+ if(t.dataset.pp)return salvarProduto(t.dataset.pp,{price:Number(t.value)||0});
+ if(t.dataset.pn)return salvarProduto(t.dataset.pn,{name:t.value.trim()});
+ if(t.dataset.pt)return salvarProduto(t.dataset.pt,{type:t.value.trim()});
+});
+
+/* ---------- produtos: salvar / excluir / adicionar ---------- */
+async function salvarProduto(id,campos){
+ const{error}=await db.from("products").update(campos).eq("id",id);
+ if(error)return toast("Erro ao salvar: "+error.message,true);
+ const p=produtos.find(x=>x.id===id);if(p)Object.assign(p,campos);
+ toast("Alteração salva ✓");
+}
+
+async function excluirProduto(id){
+ if(!confirm("Excluir este produto? Essa ação não pode ser desfeita."))return;
+ const{error}=await db.from("products").delete().eq("id",id);
+ if(error)return toast("Erro ao excluir: "+error.message,true);
+ produtos=produtos.filter(p=>p.id!==id);
+ toast("Produto excluído");
+ carregar();
+}
+
+async function uploadImagem(file){
+ const ext=(file.name.split(".").pop()||"jpg").toLowerCase();
+ const path=`${uid()}.${ext}`;
+ const{error}=await db.storage.from(BUCKET).upload(path,file,{cacheControl:"3600",upsert:false});
+ if(error)throw error;
+ return db.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+}
+
+$("formProd").elements.image.addEventListener("change",e=>{
+ const f=e.target.files[0];
+ $("fileTxt").textContent=f?"📷 "+f.name:"📷 Imagem";
+});
+
+$("formProd").onsubmit=async e=>{
+ e.preventDefault();
+ const f=e.target,btn=f.querySelector("button[type=submit]");
+ const nome=f.elements["name"].value.trim();
+ const tipo=f.elements["type"].value.trim();
+ const preco=Number(String(f.elements["price"].value).replace(",","."))||0;
+ const arquivo=f.elements["image"].files[0];
+
+ btn.disabled=true;btn.textContent="Adicionando...";
+ try{
+   let image_url=null;
+   if(arquivo){
+     try{image_url=await uploadImagem(arquivo)}
+     catch(err){toast("Imagem não enviada: "+(err.message||err),true)}
+   }
+   const{error}=await db.from("products").insert({name:nome,type:tipo,price:preco,image_url});
+   if(error)throw error;
+   f.reset();$("fileTxt").textContent="📷 Imagem";
+   toast("Produto adicionado ✓");
+   await carregar();
+ }catch(err){
+   toast("Erro ao adicionar: "+(err.message||err),true);
+ }finally{
+   btn.disabled=false;btn.textContent="Adicionar";
+ }
+};
+
+/* ---------- exportação Excel ---------- */
+const dadosClientes=()=>clientes.map(c=>({
+  "Nome":c.name,"Telefone":fmtFone(c.phone),"WhatsApp":c.phone,
+  "Origem":label(c.source),"Cadastro":dataBR(c.created_at)}));
+
+const dadosOrcs=()=>orcs.map(q=>({
+  "Cliente":q.customers?.name||"—",
+  "Telefone":q.customers?fmtFone(q.customers.phone):"",
+  "Origem":q.customers?.source||"",
+  "Status":q.status,
+  "Resumo":q.summary||"",
+  "Total":Number(q.total||0),
+  "Data":dataBR(q.created_at)}));
+
+const dadosProdutos=()=>produtos.map(p=>({
+  "Nome":p.name,"Tipo":p.type||"","Preço":Number(p.price||0),
+  "Imagem":p.image_url||"","Criado em":dataBR(p.created_at)}));
+
+function baixar(blob,nome){
+ const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=nome;
+ document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+
+function exportarCSV(){
+ const mapa={
+  clientes:{arq:"clientes",cab:["Nome","Telefone","Origem","Cadastro"],
+    lin:clientes.map(c=>[c.name,fmtFone(c.phone),label(c.source),dataBR(c.created_at)])},
+  orcamentos:{arq:"orcamentos",cab:["Cliente","Telefone","Origem","Status","Resumo","Total","Data"],
+    lin:orcs.map(q=>[q.customers?.name||"—",q.customers?fmtFone(q.customers.phone):"",q.customers?.source||"",
+      q.status,q.summary||"",Number(q.total||0).toFixed(2).replace(".",","),dataBR(q.created_at)])},
+  produtos:{arq:"produtos",cab:["Nome","Tipo","Preço","Imagem","Criado em"],
+    lin:produtos.map(p=>[p.name,p.type||"",Number(p.price||0).toFixed(2).replace(".",","),p.image_url||"",dataBR(p.created_at)])}
+ };
+ const m=mapa[aba];
+ const csv=[m.cab,...m.lin].map(l=>l.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(";")).join("\r\n");
+ baixar(new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8;"}),`topprint-${m.arq}.csv`);
+}
+
+$("exportar").onclick=()=>{
+ const nome=`topprint-${new Date().toISOString().slice(0,10)}`;
+ if(!window.XLSX){toast("Biblioteca Excel indisponível — gerando CSV.");return exportarCSV()}
+ try{
+   const wb=XLSX.utils.book_new();
+   const abas=[["Clientes",dadosClientes()],["Orçamentos",dadosOrcs()],["Produtos",dadosProdutos()]];
+   for(const[titulo,linhas]of abas){
+     const ws=XLSX.utils.json_to_sheet(linhas.length?linhas:[{"Sem dados":""}]);
+     XLSX.utils.book_append_sheet(wb,ws,titulo);
+   }
+   XLSX.writeFile(wb,`${nome}.xlsx`);
+   toast("Excel gerado ✓");
+ }catch(err){toast("Falha ao gerar Excel: "+err.message,true);exportarCSV()}
+};
+
+/* ---------- sessão ---------- */
+db.auth.getSession().then(({data})=>{if(data.session&&SUPABASE_URL)entrar()});
+</script></body></html>
